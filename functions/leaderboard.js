@@ -29,48 +29,32 @@ module.exports = functions.https.onRequest((req, response) => {
 
   // If user param exists, send user's score
   if (user) {
-    db.collection('users').doc(user).get()
-      .then(snapshot => {
-        if(snapshot.exists) {
-          db.collection('ratings')
+        db.collection('ratings')
           .where('game', '==', game)
           .where('slack_handle', '==', user)
           .get()
-          .then(rating => {
-            if(rating.docs[0]) {
-              const record = rating.docs[0].data();
-              
-              const slackMessage = {
-                user: req.body.user_id,
-                channel: req.body.channel_id,
-                attachments: [{
-                  color: "#ed9005",
-                  title: `Riskalyze Leaderboard: ${game.toUpperCase()}`,
-                  fields: [{
-                    value: `<@${record.slack_handle}>: ${record.rating}`,
-                    short: false
-                  }]
-                }]
-              }
-
-              return slack.chat.postEphemeral(slackMessage);
-            } else {
-              const errorMessage = `This user does not have a rating.`
-
-              return postMessage(errorMessage);
+          .then(ratings => {
+            if (ratings.size == 0) {
+              return postMessage('This user does not have a rating.');
             }
-          })
-        } else {
-          const errorMessage = `Not a valid user.`
+            const record = ratings.docs[0].data();
 
-          return postMessage(errorMessage);
-        }
-      })
-      .catch(err => {
-        const errorMessage = `Could not get user ranking.`
+            const slackMessage = {
+              user: req.body.user_id,
+              channel: req.body.channel_id,
+              attachments: [{
+                color: "#ed9005",
+                title: `Riskalyze Leaderboard: ${game.toUpperCase()}`,
+                fields: [{
+                  value: `<@${record.slack_handle}>: ${record.rating}`,
+                  short: false
+                }]
+              }]
+            }
 
-        return postMessage(errorMessage);
-      })
+            return slack.chat.postEphemeral(slackMessage);
+          });
+
     response.send('');
   } else {
   db.collection('games').doc(game).get()
