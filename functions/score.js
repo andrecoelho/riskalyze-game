@@ -70,6 +70,7 @@ module.exports = functions.https.onRequest((request, response) => {
           '>.',
         attachments: [
           {
+            callback_id: 'approve-score',
             fallback: 'Your slack app is not able to approve scores.',
             text: 'Please choose your agreement below:',
             actions: [
