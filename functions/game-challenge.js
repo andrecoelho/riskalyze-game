@@ -85,17 +85,17 @@ class GameChallenge {
                                     callback_id: 'game-challenge',
                                     actions: [
                                         {
-                                            name: 'Accept',
+                                            name: 'approval',
                                             text: 'I Accept!',
                                             type: 'button',
-                                            value: challenge.id,
+                                            value: 'accept',
                                             style: 'primary'
                                         },
                                         {
-                                            name: 'Reject',
+                                            name: 'approval',
                                             text: 'No thanks!',
                                             type: 'button',
-                                            value: challenge.id,
+                                            value: 'reject',
                                             style: 'danger'
                                         }                                    
                                     ]
