@@ -1,9 +1,11 @@
 const functions = require('firebase-functions');
 const score = require('./score');
 const gameChallenge = require('./game-challenge');
+const leaderboard = require('./leaderboard');
 
 exports.score = score;
 exports.gameChallenge = gameChallenge;
+exports.leaderboard - leaderboard;
 
 exports.message_action = functions.https.onRequest((request, response) => {
     console.log(request.body);
