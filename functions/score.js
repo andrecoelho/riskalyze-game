@@ -11,7 +11,7 @@ module.exports = functions.https.onRequest((request, response) => {
     return slack.chat.postEphemeral({
       channel: request.body.channel_id,
       user: request.body.user_id,
-      text: 'Usage: /game-score @opponent [game] @winner'
+      text: 'Usage: *'+request.body.command+'* `@opponent [game] @winner`'
     });
   }
 
