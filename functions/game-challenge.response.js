@@ -3,10 +3,9 @@ const slack = require('./slack');
 
 module.exports = function(payload) {
   const button = payload.actions[0];
+  const challengeRef = db.doc('/challenges/' + button.value);
 
   if (button.name === 'accept') {
-    const challengeRef = db.doc('/challenges/' + button.value);
-
     challengeRef.get().then(challenge => {
       const player = payload.user.name;
       const user_a = challenge.data().user_a;
@@ -16,7 +15,7 @@ module.exports = function(payload) {
 
       slack.chat.postMessage({
         channel: '@' + opponent,
-        text: '<@' + player + '> has accepted your challenge.'
+        text: '<@' + player + '> has accepted your challenge. :tada:'
       });
 
       challengeRef.update({
@@ -35,8 +34,6 @@ module.exports = function(payload) {
       });
     });
   } else {
-    const challengeRef = db.doc('/challenges/' + button.value);
-
     challengeRef.get().then(challenge => {
       const player = payload.user.name;
       const user_a = challenge.data().user_a;
@@ -46,7 +43,7 @@ module.exports = function(payload) {
 
       slack.chat.postMessage({
         channel: '@' + opponent,
-        text: '<@' + player + '> has rejected your challenge.'
+        text: '<@' + player + '> has rejected your challenge. :disappointed:'
       });
 
       challengeRef.delete();
