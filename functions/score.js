@@ -77,14 +77,14 @@ module.exports = functions.https.onRequest((request, response) => {
                 name: 'approve',
                 text: 'Approve',
                 type: 'button',
-                value: 'approve',
+                value: challenge.id,
                 style: 'primary'
               },
               {
                 name: 'reject',
                 text: 'Reject',
                 type: 'button',
-                value: 'reject',
+                value: challenge.id,
                 style: 'danger'
               }
             ]
