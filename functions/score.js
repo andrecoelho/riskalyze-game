@@ -11,7 +11,7 @@ module.exports = functions.https.onRequest((request, response) => {
     return slack.chat.postEphemeral({
       channel: request.body.channel_id,
       user: request.body.user_id,
-      text: 'Usage: *'+request.body.command+'* `@opponent [game] @winner`'
+      text: 'Usage: *' + request.body.command + '* `@opponent [game] @winner`'
     });
   }
 
@@ -20,34 +20,33 @@ module.exports = functions.https.onRequest((request, response) => {
   const game = arguments[1].toLowerCase();
   const winner = stripAt(arguments[2]).toLowerCase();
 
-  findOpenChallenge(game, player, opponent)
+  findAcceptedChallenge(game, player, opponent)
     .then(challenges => {
       if (challenges.size == 1) {
         return challenges.docs[0];
       } else {
-        return findOpenChallenge(game, opponent, player).then(challenges => {
-          if (challenges.size == 1) {
-            return challenges.docs[0];
-          } else {
-            slack.chat.postEphemeral({
-              channel: request.body.channel_id,
-              user: request.body.user_id,
-              text: 'Cannot post score, challenge not found.'
-            });
+        return findAcceptedChallenge(game, opponent, player).then(
+          challenges => {
+            if (challenges.size == 1) {
+              return challenges.docs[0];
+            } else {
+              slack.chat.postEphemeral({
+                channel: request.body.channel_id,
+                user: request.body.user_id,
+                text: 'Cannot post score, challenge not found.'
+              });
 
-            throw new Error();
+              throw new Error();
+            }
           }
-        });
+        );
       }
     })
     .then(challenge => {
-      db.doc('/challenges/' + challenge.id).set(
-        {
-          winner,
-          status: 'scored'
-        },
-        { merge: true }
-      );
+      db.doc('/challenges/' + challenge.id).update({
+        winner,
+        status: 'scored'
+      });
 
       slack.chat.postEphemeral({
         channel: request.body.channel_id,
@@ -96,10 +95,10 @@ module.exports = functions.https.onRequest((request, response) => {
     .catch(() => {});
 });
 
-function findOpenChallenge(game, player, opponent) {
+function findAcceptedChallenge(game, player, opponent) {
   return db
     .collection('challenges')
-    .where('status', '==', 'open')
+    .where('status', '==', 'accepted')
     .where('game', '==', game)
     .where('user_a', '==', player)
     .where('user_b', '==', opponent)

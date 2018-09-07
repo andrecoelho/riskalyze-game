@@ -16,7 +16,7 @@ class GameChallenge {
         this.challenger = null;
         this.game = null;
         this.slackResponse = {};
-        this.availableGames = [];        
+        this.availableGames = [];
     }
 
     // fetch the availabe games from the database, and validate the input from the user is a valid game to challenge
@@ -30,7 +30,7 @@ class GameChallenge {
                 let shortNames = [];
                 allGames.forEach((game) => {
                     let data = game.data();
-                    self.availableGames.push(data);   
+                    self.availableGames.push(data);
                     if (game.id === self.game) {
                         isValidGame = true;
                     }
@@ -47,7 +47,7 @@ class GameChallenge {
             }).catch(console.error);
         });
     }
-    
+
     validateAndParseParameters(slackResponse) {
         let commandParameters = slackResponse.text.split(' ');
         if (commandParameters.length !== 2) {
@@ -64,8 +64,8 @@ class GameChallenge {
 
     challenge() {
         const self = this;
-        // make sure it's a valid game   
-        this.validateAvailableGames().then(() => {    
+        // make sure it's a valid game
+        this.validateAvailableGames().then(() => {
             self.validateChallengeAvailability()
                 .then(() => {
                     // create a challenge and tell the challengee
@@ -75,9 +75,19 @@ class GameChallenge {
                         user_a: self.challenger,
                         user_b: self.challengee
                     }).then(challenge => {
+                        slack.chat.postEphemeral({
+                            channel: self.slackResponse.channel_id,
+                            user: self.slackResponse.user_id,
+                            text:
+                                'You have challenged <@' +
+                                self.challengee +
+                                '> in a game of ' +
+                                self.game + '.'
+                        });
+
                         slack.chat.postMessage({
                             text: 'You have been challenged by <@' + self.challenger + '> in a game of ' + self.game + '.',
-                            channel: '@' + self.challengee,                        
+                            channel: '@' + self.challengee,
                             attachments: [
                                 {
                                     text: 'Do you accept?',
@@ -85,31 +95,31 @@ class GameChallenge {
                                     callback_id: 'game-challenge',
                                     actions: [
                                         {
-                                            name: 'approval',
+                                            name: 'accept',
                                             text: 'I Accept!',
                                             type: 'button',
-                                            value: 'accept',
+                                            value: challenge.id,
                                             style: 'primary'
                                         },
                                         {
-                                            name: 'approval',
+                                            name: 'reject',
                                             text: 'No thanks!',
                                             type: 'button',
-                                            value: 'reject',
+                                            value: challenge.id,
                                             style: 'danger'
-                                        }                                    
+                                        }
                                     ]
                                 }
                             ]
                         });
-                    });                                        
-                }, err => {             
+                    });
+                }, err => {
                     slack.chat.postEphemeral({
                         channel: self.slackResponse.channel_id,
                         user: self.slackResponse.user_id,
                         text: self.getErrors()
                     });
-                })                
+                })
         }, (err) => {
             // send message back to user with error
             slack.chat.postEphemeral({
@@ -123,7 +133,7 @@ class GameChallenge {
     // Checks that the two Challengers don't already have an open challenge
     validateChallengeAvailability() {
         const self = this;
-        return new Promise(function(resolve, reject) {        
+        return new Promise(function(resolve, reject) {
             db.collection('challenges')
                 .where('user_a', '==', self.challenger)
                 .where('user_b', '==', self.challengee)
@@ -135,7 +145,7 @@ class GameChallenge {
                     matchedChallenges.forEach(challenge => {
                         if (['open', 'accepted', 'scored'].indexOf(challenge.data().status) >= 0) {
                             hasOpenChallenge = true;
-                        }                
+                        }
                     });
                     if (hasOpenChallenge) {
                         self.errors.push("You already have an open challenge with this Riskalyzer!");
@@ -152,7 +162,7 @@ class GameChallenge {
                                 matchedChallenges.forEach(challenge => {
                                     if (['open', 'accepted', 'scored'].indexOf(challenge.data().status) >= 0) {
                                         hasOpenChallenge = true;
-                                    }                
+                                    }
                                 });
                                 if (hasOpenChallenge) {
                                     self.errors.push("You already have an open challenge with this Riskalyzer!");
@@ -176,7 +186,7 @@ class GameChallenge {
 module.exports = functions.https.onRequest(function(request, response) {
     const gc = new GameChallenge();
 
-    let slackResponse = request.body;    
+    let slackResponse = request.body;
     if (!gc.validateAndParseParameters(slackResponse)) {
         response.send(gc.getErrors());
         return;
