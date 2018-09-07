@@ -1,18 +1,23 @@
 const fieldValue = require('firebase-admin').firestore.FieldValue;
+const EloRank = require('elo-rank');
 const db = require('./db');
 const slack = require('./slack');
+const elo = new EloRank(15);
 
 module.exports = function(payload) {
   const button = payload.actions[0];
   const challengeRef = db.doc('/challenges/' + button.value);
 
   if (button.name === 'approve') {
-    challengeRef.get().then(challenge => {
+    challengeRef.get().then(challengeDoc => {
+      const challenge = challengeDoc.data();
       const player = payload.user.name;
-      const user_a = challenge.data().user_a;
-      const user_b = challenge.data().user_b;
+      const user_a = challenge.user_a;
+      const user_b = challenge.user_b;
 
       const opponent = player === user_a ? user_b : user_a;
+
+      updateNewRanks(challenge);
 
       slack.chat.postMessage({
         channel: '@' + opponent,
@@ -65,3 +70,53 @@ module.exports = function(payload) {
     });
   }
 };
+
+function updateNewRanks(challenge) {
+  const winnerSlackHandle = challenge.winner;
+
+  const loserSlackHandle =
+    challenge.user_a === challenge.winner ? challenge.user_b : challenge.user_a;
+
+  const winnerRatingPromise = db
+    .collection('ratings')
+    .where('game', '==', challenge.game)
+    .where('slack_handle', '==', winnerSlackHandle)
+    .get()
+    .then(ratings => {
+      if (ratings.size === 1) {
+        return {
+          id: ratings.docs[0].id,
+          rating: ratings.docs[0].data().rating
+        };
+      }
+    });
+
+  const loserRatingPromise = db
+    .collection('ratings')
+    .where('game', '==', challenge.game)
+    .where('slack_handle', '==', loserSlackHandle)
+    .get()
+    .then(ratings => {
+      if (ratings.size === 1) {
+        return {
+          id: ratings.docs[0].id,
+          rating: ratings.docs[0].data().rating
+        };
+      }
+    });
+
+  Promise.all([winnerRatingPromise, loserRatingPromise]).then(
+    ([winner, loser]) => {
+      const expectedWinner = elo.getExpected(winner.rating, loser.rating);
+      const expectedLoser = elo.getExpected(loser.rating, winner.rating);
+
+      db.doc('/ratings/' + winner.id).update({
+        rating: elo.updateRating(expectedWinner, 1, winner.rating)
+      });
+
+      db.doc('/ratings/' + loser.id).update({
+        rating: elo.updateRating(expectedLoser, 0, loser.rating)
+      });
+    }
+  );
+}

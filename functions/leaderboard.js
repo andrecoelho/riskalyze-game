@@ -31,11 +31,11 @@ module.exports = functions.https.onRequest((req, response) => {
             let rankCounter = 1;
 
             ratings.forEach(rating => {
-              const user = rating.data().user
+              const slack_handle = rating.data().slack_handle
               const score = rating.data().rating;
 
               slackMessage.attachments[0].fields.push({
-                value: `${rankCounter}. ${user}: ${score}`,
+                value: `${rankCounter}. <@${slack_handle}>: ${score}`,
                 short: false
               });
 
