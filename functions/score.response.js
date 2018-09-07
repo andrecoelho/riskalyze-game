@@ -73,6 +73,7 @@ module.exports = function(payload) {
 
 function updateNewRanks(challenge) {
   const winnerSlackHandle = challenge.winner;
+  const initialRating = 1200;
 
   const loserSlackHandle =
     challenge.user_a === challenge.winner ? challenge.user_b : challenge.user_a;
@@ -88,6 +89,18 @@ function updateNewRanks(challenge) {
           id: ratings.docs[0].id,
           rating: ratings.docs[0].data().rating
         };
+      } else {
+        return db
+          .collection('ratings')
+          .add({
+            game: challenge.game,
+            rating: initialRating,
+            slack_handle: winnerSlackHandle
+          })
+          .then(rating => ({
+            id: rating.id,
+            rating: initialRating
+          }));
       }
     });
 
@@ -102,6 +115,18 @@ function updateNewRanks(challenge) {
           id: ratings.docs[0].id,
           rating: ratings.docs[0].data().rating
         };
+      } else {
+        return db
+          .collection('ratings')
+          .add({
+            game: challenge.game,
+            rating: initialRating,
+            slack_handle: loserSlackHandle
+          })
+          .then(rating => ({
+            id: rating.id,
+            rating: initialRating
+          }));
       }
     });
 
