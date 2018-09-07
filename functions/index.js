@@ -8,7 +8,7 @@ const scoreResponse = require('./score.response');
 
 exports.score = score;
 exports.gameChallenge = gameChallenge;
-exports.leaderboard - leaderboard;
+exports.leaderboard = leaderboard;
 
 exports.message_action = functions.https.onRequest((request, response) => {
   if (request.method !== 'POST') {
