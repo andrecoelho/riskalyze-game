@@ -1,6 +1,5 @@
-const functions = require('firebase-functions');
-const db = require('./db');
-const slack = require('./slack');
+const db = require('../db');
+const slack = require('../slack');
 
 const GAME_CHALLENGE_STATUS = {
     OPEN: 'open',
@@ -183,7 +182,7 @@ class GameChallenge {
     }
 }
 
-module.exports = functions.https.onRequest(function(request, response) {
+module.exports = function(request, response) {
     const gc = new GameChallenge();
 
     let slackResponse = request.body;
@@ -193,4 +192,4 @@ module.exports = functions.https.onRequest(function(request, response) {
     }
     gc.challenge();
     response.send('');
-});
+};

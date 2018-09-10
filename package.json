@@ -1,0 +1,20 @@
+{
+  "name": "rsk-challenge",
+  "description": "Riskalyze Challenge",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@slack/client": "^4.6.0",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
+    "elo-rank": "^1.0.3",
+    "express": "^4.16.3",
+    "firebase": "^5.4.2"
+  },
+  "private": true,
+  "devDependencies": {
+    "nodemon": "^1.18.4"
+  }
+}
