@@ -4,7 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const name = fs.readFileSync('./name.txt', 'utf8');
-let port = 80;
+let port = process.env.PORT || 3000;
 
 if (process.env.NODE_ENV !== 'production') {
   console.log('DEVELOPMENT MODE');
