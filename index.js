@@ -4,10 +4,17 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const name = fs.readFileSync('./name.txt', 'utf8');
+let port = 80;
 
-require('dotenv').config({
-  path: path.join(path.dirname(__filename), '.env')
-});
+if (process.env.NODE_ENV !== 'production') {
+  console.log('DEVELOPMENT MODE');
+
+  require('dotenv').config({
+    path: path.join(path.dirname(__filename), '.env')
+  });
+
+  port = process.env.APP_PORT;
+}
 
 const challenge = require('./src/functions/challenge');
 const leaderboard = require('./src/functions/leaderboard');
@@ -22,4 +29,6 @@ app.post('/leaderboard', leaderboard);
 app.post('/score', score);
 app.post('/message-action', messageAction);
 
-app.listen(5000, () => console.log(`Server Ready\n\n${name}\n`));
+app.get('/status', (req, res) => res.send('OK'));
+
+app.listen(port, () => console.log(`Server running on port ${port}\n\n${name}\n`));

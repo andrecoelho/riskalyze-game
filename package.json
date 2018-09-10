@@ -1,6 +1,10 @@
 {
   "name": "rsk-challenge",
   "description": "Riskalyze Challenge",
+  "engines": {
+    "node": "8.11.3",
+    "npm": "5.6.0"
+  },
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js"
