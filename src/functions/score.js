@@ -1,8 +1,7 @@
-const functions = require('firebase-functions');
-const db = require('./db');
-const slack = require('./slack');
+const db = require('../db');
+const slack = require('../slack');
 
-module.exports = functions.https.onRequest((request, response) => {
+module.exports = (request, response) => {
   response.send();
 
   const arguments = request.body.text.replace(/\s+/, ' ').split(' ');
@@ -93,7 +92,7 @@ module.exports = functions.https.onRequest((request, response) => {
       });
     })
     .catch(() => {});
-});
+};
 
 function findAcceptedChallenge(game, player, opponent) {
   return db

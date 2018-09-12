@@ -1,7 +1,7 @@
-const fieldValue = require('firebase-admin').firestore.FieldValue;
+const fieldValue = require('firebase').firestore.FieldValue;
 const EloRank = require('elo-rank');
-const db = require('./db');
-const slack = require('./slack');
+const db = require('../db');
+const slack = require('../slack');
 const elo = new EloRank(15);
 
 module.exports = function(payload) {
