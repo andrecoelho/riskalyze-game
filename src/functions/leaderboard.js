@@ -1,9 +1,7 @@
-const functions = require('firebase-functions');
-const slack = require('./slack');
+const slack = require('../slack');
+const db  = require('../db');
 
-const db  = require('./db');
-
-module.exports = functions.https.onRequest((req, response) => {
+module.exports = (req, response) => {
   const postMessage = (message) => {
     return slack.chat.postEphemeral({
       user: req.body.user_id,
@@ -97,4 +95,4 @@ module.exports = functions.https.onRequest((req, response) => {
       response.send('');
     })
   }
-});
+};

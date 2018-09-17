@@ -1,5 +1,5 @@
-const db = require('./db');
-const slack = require('./slack');
+const db = require('../db');
+const slack = require('../slack');
 
 module.exports = function(payload) {
   const button = payload.actions[0];
